@@ -5,8 +5,10 @@ import { convertPdfToImage } from '~/lib/pdf2img';
 import { usePuterStore } from '~/lib/puter';
 import { generateUUID } from '~/lib/utils';
 import {prepareInstructions, AIResponseFormat} from "../../constants";
+import { useNavigate } from 'react-router';
 
 const Upload = () => {
+    const navigate = useNavigate();
     const { auth, isLoading, fs, ai, kv } = usePuterStore();
     const [isProcessing, setIsProcessing] = useState(false);
     const [statusText, setStatusText] = useState('');
@@ -52,10 +54,10 @@ const Upload = () => {
                 companyName, 
                 jobTitle,
                 jobDescription,
-                feedback: ''
+                feedback: null // Will be updated after AI analysis
             }
 
-            await kv.set(`resume_${uuid}`, JSON.stringify(data));
+            // Don't save yet - wait until we have the feedback
 
             setStatusText('Analyzing resume...');
 
@@ -73,9 +75,11 @@ const Upload = () => {
 
             data.feedback = JSON.parse(feedbackText);
 
-            await kv.set(`resume_${uuid}`, JSON.stringify(data));
+            // Save the complete data with feedback using consistent key format
+            await kv.set(`resume:${uuid}`, JSON.stringify(data));
             setStatusText('Analysis complete! Redirecting...');
-            console.log('Data:', data);
+            console.log('Final data saved:', data);
+            navigate(`/resume/${uuid}`);
         } catch (error) {
             console.error('Error during analysis:', error);
             setStatusText(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);

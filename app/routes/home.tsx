@@ -15,6 +15,7 @@ export function meta({ }: Route.MetaArgs) {
   useEffect(() => {
     if (!auth.isAuthenticated) navigate('/auth?next=/');
   }, [auth.isAuthenticated])
+  
   return [
     { title: "ResuMate" },
     { name: "description", content: "Smart feedback for your dream job!" },
